@@ -216,7 +216,7 @@ bool Calibration::calibration(
         return false;
     }
 
-    // TODO: construct the P matrix (so P * m = 0).
+    // TODO: construct the P matrix to use SVD to solve the m(so P * m = 0).
     // P is a 2n * 12 matrix(2n >= 12)
 
 
