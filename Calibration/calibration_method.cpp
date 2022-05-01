@@ -203,10 +203,24 @@ bool Calibration::calibration(
                  "\tIMPORTANT: don't forget to write your recovered parameters to the above variables." << std::endl;
 
     // TODO: check if input is valid (e.g., number of correspondences >= 6, sizes of 2D/3D points must match)
+    if (points_2d.size() < 6) {
+        std::cout << "insufficient number of 2d points, minimum required: 6" << '\n';
+        return false;
+    }
+    if (points_3d.size() < 6) {
+        std::cout << "insufficient number of 3d points, minimum required: 6" << '\n';
+        return false;
+    }
+    if (points_2d.size() != points_3d.size()) {
+        std::cout << "sizes of 2D/3D points DONT match, please check the input files" << '\n';
+        return false;
+    }
 
     // TODO: construct the P matrix (so P * m = 0).
+    // P is a 2n * 12 matrix(2n >= 12)
 
-    // TODO: solve for M (the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
+
+    // TODO: solve for M (3 * 4 matrix, the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
     //   Optional: you can check if your M is correct by applying M on the 3D points. If correct, the projected point
     //             should be very close to your input images points.
 
