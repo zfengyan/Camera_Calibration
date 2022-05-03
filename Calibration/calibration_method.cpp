@@ -29,6 +29,12 @@
 using namespace easy3d;
 
 
+// helpful functions for calibration
+bool construct_matrix_p(
+    Matrix& P,
+    const std::vector<Vector3D>& points_3d,
+    const std::vector<Vector2D>& points_2d);
+
 
 /**
  * TODO: Finish this function for calibrating a camera from the corresponding 3D-2D point pairs.
@@ -129,9 +135,9 @@ bool Calibration::calibration(
                0, 0, 1);
 
     /// define and initialize a 3 by 4 matrix
-    Matrix34 P(1.1, 2.2, 3.3, 0,
+    /*Matrix34 P(1.1, 2.2, 3.3, 0,
                0, 2.2, 3.3, 1,
-               0, 0, 1, 1);
+               0, 0, 1, 1);*/
 
     /// define a 15 by 9 matrix (and all elements initialized to 0.0)
     Matrix W(15, 9, 0.0);
@@ -202,7 +208,10 @@ bool Calibration::calibration(
                  "\t\t- t:         a 3D vector encoding camera location.\n"
                  "\tIMPORTANT: don't forget to write your recovered parameters to the above variables." << std::endl;
 
-    // TODO: check if input is valid (e.g., number of correspondences >= 6, sizes of 2D/3D points must match)
+  
+    /*
+    * TODO - 1: check if input is valid (e.g., number of correspondences >= 6, sizes of 2D/3D points must match).
+    * ---------------------------------------------------------------------------------------------------------------*/
     if (points_2d.size() < 6) {
         std::cout << "insufficient number of 2d points, minimum required: 6" << '\n';
         return false;
@@ -216,8 +225,17 @@ bool Calibration::calibration(
         return false;
     }
 
-    // TODO: construct the P matrix to use SVD to solve the m(so P * m = 0).
-    // P is a 2n * 12 matrix(2n >= 12)
+
+    /*
+    * TODO - 2: construct the P matrix to use SVD to solve the m(so P * m = 0).
+    * P is a 2n * 12 matrix(2n >= 12)
+    * ---------------------------------------------------------------------------------------------------------------*/
+    int nrows = (int)(2 * points_3d.size());
+    const int ncols = 12;  // number of cols is constant
+    Matrix P(nrows, ncols);
+    construct_matrix_p(P, points_3d, points_2d);
+
+    //std::cout << P(0, 11);
 
 
     // TODO: solve for M (3 * 4 matrix, the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
@@ -231,6 +249,50 @@ bool Calibration::calibration(
     std::cout << "\n\tTODO: After you implement this function, please return 'true' - this will trigger the viewer to\n"
                  "\t\tupdate the rendering using your recovered camera parameters. This can help you to visually check\n"
                  "\t\tif your calibration is successful or not.\n\n" << std::flush;
+    return false;
+}
+
+
+bool construct_matrix_p(
+    Matrix& P,
+    const std::vector<Vector3D>& points_3d,
+    const std::vector<Vector2D>& points_2d) 
+{
+    std::cout << "construct P matrix" << '\n';
+    std::cout << "P matrix rows: " << P.rows() << '\n';
+    std::cout << "P matrix cols: " << P.cols() << '\n';
+
+    // initialize the P matrix according to eq.(4) in notes: 02-camera_calibration.pdf
+    std::vector<double> row_values;  // store values for one row
+    for (int i = 0; i != P.rows(); ++i) {
+        if (i & 1) {  // the position of a row is an odd number, e.g.: 1, 3, 5, 7, ...
+            
+            std::cout << i << '\n';
+            std::cout << typeid(points_3d[i].data()[0]).name() << '\n';
+           /* P.set_row(i,
+                {
+                    0, 0, 0, 0,
+                    x, y, z, 1.0,
+                    -v * x, -v * y, -v * z, -v
+                });*/
+        }
+        else {  // the position of a col is an even numbe, e.g.: 0, 2, 4, 6, ...
+            const double x = points_3d[i].x();  // NB: points_3D
+            const double y = points_3d[i].y();
+            const double z = points_3d[i].z();
+
+            const double u = points_2d[i].x(); // NB: poins_2D - x
+
+           /* P.set_row(i,
+                {
+                    x, y, z, 1.0,
+                    0, 0, 0, 0,
+                    -u * x, -u * y, -u * z, -u
+                });*/
+        }
+
+    }
+
     return false;
 }
 
