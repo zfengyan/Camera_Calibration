@@ -33,6 +33,9 @@ using namespace easy3d;
 * helpful functions for calibration
 * ---------------------------------------------------------------------------------------------------------------*/
 
+// check whether ALL points are coplanar
+bool check_points_coplanar(const std::vector<Vector3D>& points_3d);
+
 // construct P matrix
 bool construct_matrix_p(
     Matrix& P,
@@ -42,8 +45,8 @@ bool construct_matrix_p(
 // print out a matrix
 void print_matrix(const Matrix& P);
 
-// check whether ALL points are coplanar
-bool check_points_coplanar(const std::vector<Vector3D>& points_3d);
+// solve for M using SVD
+bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V);
 
 
 /**
@@ -123,8 +126,8 @@ bool Calibration::calibration(
 
     // Define an m-by-n double valued matrix.
     // Here I use the above array to initialize it. You can also use A(i, j) to initialize/modify/access its elements.
-    const int m = 6, n = 5;
-    Matrix A(m, n, array.data());    // 'array.data()' returns a pointer to the array.
+    //const int m = 6, n = 5;
+    //Matrix A(m, n, array.data());    // 'array.data()' returns a pointer to the array.
 //    std::cout << "M: \n" << A << std::endl;
 
     /// define a 3 by 4 matrix (and all elements initialized to 0.0)
@@ -172,12 +175,12 @@ bool Calibration::calibration(
     /// matrix-vector product
     Vector3D v = M * Vector4D(1, 2, 3, 4); // M is 3 by 4
 
-    Matrix U(m, m, 0.0);   // initialized with 0s
-    Matrix S(m, n, 0.0);   // initialized with 0s
-    Matrix V(n, n, 0.0);   // initialized with 0s
+    //Matrix U(m, m, 0.0);   // initialized with 0s
+    //Matrix S(m, n, 0.0);   // initialized with 0s
+    //Matrix V(n, n, 0.0);   // initialized with 0s
 
     // Compute the SVD decomposition of A
-    svd_decompose(A, U, S, V);
+    //svd_decompose(A, U, S, V);
 
     // Now let's check if the SVD result is correct
 
@@ -261,9 +264,27 @@ bool Calibration::calibration(
     }
 
 
-    // TODO: solve for M (3 * 4 matrix, the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
-    //   Optional: you can check if your M is correct by applying M on the 3D points. If correct, the projected point
-    //             should be very close to your input images points.
+    /*
+    * TODO - 3: solve for M (3 * 4 matrix, the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
+    * Optional: 
+    * you can check if your M is correct by applying M on the 3D points. If correct, the projected point
+    * should be very close to your input images points.
+    * ---------------------------------------------------------------------------------------------------------------*/
+    std::cout << "test SVD" << '\n';
+    const int& m = P.rows();
+    const int& n = P.cols();
+
+	Matrix U(m, m);  
+	Matrix S(m, n);  
+	Matrix V(n, n); 
+
+	// Compute the SVD decomposition of P
+    bool is_svd_solved = solve_svd(P, U, S, V);
+    if (!is_svd_solved) {
+        std::cout << "SVD failed, please check " << '\n';
+        return false;
+    }
+
 
     // TODO: extract intrinsic parameters from M.
 
@@ -378,6 +399,41 @@ void print_matrix(const Matrix& P) {
         }
         std::cout << '\n';
     }
+}
+
+
+
+// solve for M using SVD
+// the result V is NOT V^T(V.transpose()) in the eq. P = USV^T
+bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V) {
+    svd_decompose(P, U, S, V);
+
+    // get the last row of matrix V (the last column of matrix VT)
+    const int v_nrows = V.rows();
+    auto print_last_row_of_v = [&](const Matrix& V) {
+        int i = v_nrows - 1;
+        for (int j = 0; j != V.cols(); ++j) {
+            std::cout << V(i, j) << " ";
+        }
+        std::cout << '\n';
+    };
+    std::cout << "the last row of matrix V is: " << '\n';
+    print_last_row_of_v(V);
+
+    // get the last column of matrix VT
+    const Matrix& VT = V.transpose();
+    const int vt_ncols = VT.cols();
+    auto print_last_column_of_vt = [&](const Matrix& VT) {
+        int j = vt_ncols - 1;
+        for (int i = 0; i != VT.rows(); ++i) {
+            std::cout << VT(i, j) << " ";
+        }
+        std::cout << '\n';
+    };
+    std::cout << "the last column of matrix VT is: " << '\n';
+    print_last_column_of_vt(VT);
+
+    return true;
 }
 
 
