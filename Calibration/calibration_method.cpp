@@ -35,6 +35,8 @@ bool construct_matrix_p(
     const std::vector<Vector3D>& points_3d,
     const std::vector<Vector2D>& points_2d);
 
+void print_matrix(const Matrix& P);
+
 
 /**
  * TODO: Finish this function for calibrating a camera from the corresponding 3D-2D point pairs.
@@ -233,9 +235,14 @@ bool Calibration::calibration(
     int nrows = (int)(2 * points_3d.size());
     const int ncols = 12;  // number of cols is constant
     Matrix P(nrows, ncols);
-    construct_matrix_p(P, points_3d, points_2d);
-
-    //std::cout << P(0, 11);
+    bool is_constructed = construct_matrix_p(P, points_3d, points_2d);
+    if (is_constructed) {
+        std::cout << "print P matrix: " << '\n';
+        print_matrix(P);
+    }
+    else {
+        std::cout << "construct P matrix failed, please check(maybe the subscript is out of bounds)" << '\n';
+    }
 
 
     // TODO: solve for M (3 * 4 matrix, the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
@@ -253,6 +260,8 @@ bool Calibration::calibration(
 }
 
 
+
+// construct the P matrix to use SVD to solve the m(so P * m = 0).
 bool construct_matrix_p(
     Matrix& P,
     const std::vector<Vector3D>& points_3d,
@@ -263,38 +272,56 @@ bool construct_matrix_p(
     std::cout << "P matrix cols: " << P.cols() << '\n';
 
     // initialize the P matrix according to eq.(4) in notes: 02-camera_calibration.pdf
-    std::vector<double> row_values;  // store values for one row
+    int j = 0;  // index in points_2d
     for (int i = 0; i != P.rows(); ++i) {
         if (i & 1) {  // the position of a row is an odd number, e.g.: 1, 3, 5, 7, ...
+            const double x = points_3d[j].x();  // NB: points_3D, using INDEX j
+            const double y = points_3d[j].y();
+            const double z = points_3d[j].z();
+            const double v = points_2d[j].y();  // NB: poins_2D - y, using INDEX j
             
-            std::cout << i << '\n';
-            std::cout << typeid(points_3d[i].data()[0]).name() << '\n';
-           /* P.set_row(i,
-                {
-                    0, 0, 0, 0,
-                    x, y, z, 1.0,
-                    -v * x, -v * y, -v * z, -v
-                });*/
+			P.set_row(i,
+			    {
+					0, 0, 0, 0,
+					x, y, z, 1.0,
+					-v * x, -v * y, -v * z, -v
+				});
+            ++j;  // in the odd row, ++j, because two rows correspond to one point in points_2d
         }
         else {  // the position of a col is an even numbe, e.g.: 0, 2, 4, 6, ...
-            const double x = points_3d[i].x();  // NB: points_3D
-            const double y = points_3d[i].y();
-            const double z = points_3d[i].z();
+            const double x = points_3d[j].x();  // NB: points_3D, using INDEX j
+            const double y = points_3d[j].y();
+            const double z = points_3d[j].z();
+            const double u = points_2d[j].x(); // NB: poins_2D - x, using INDEX j
 
-            const double u = points_2d[i].x(); // NB: poins_2D - x
-
-           /* P.set_row(i,
+            P.set_row(i,
                 {
                     x, y, z, 1.0,
                     0, 0, 0, 0,
                     -u * x, -u * y, -u * z, -u
-                });*/
+                });
         }
 
     }
 
-    return false;
+    std::cout << "P matrix constructed! " << '\n';
+    return true;  // if every step goes fine, return true
 }
+
+
+
+// if P matrix constructed, print P to check
+void print_matrix(const Matrix& P) {
+    for (int i = 0; i != P.rows(); ++i) {
+        for (int j = 0; j != P.cols(); ++j) {
+            std::cout << P(i, j) << ", ";
+        }
+        std::cout << '\n';
+    }
+}
+
+
+
 
 
 
