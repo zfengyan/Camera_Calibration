@@ -29,20 +29,28 @@
 using namespace easy3d;
 
 
-// helpful functions for calibration
+/*
+* helpful functions for calibration
+* ---------------------------------------------------------------------------------------------------------------*/
+
+// construct P matrix
 bool construct_matrix_p(
     Matrix& P,
     const std::vector<Vector3D>& points_3d,
     const std::vector<Vector2D>& points_2d);
 
+// print out a matrix
 void print_matrix(const Matrix& P);
+
+// check whether ALL points are coplanar
+bool check_points_coplanar(const std::vector<Vector3D>& points_3d);
 
 
 /**
  * TODO: Finish this function for calibrating a camera from the corresponding 3D-2D point pairs.
  *       You may define a few functions for some sub-tasks.
  * @return True on success, otherwise false. On success, the camera parameters are returned by
- */
+ * ---------------------------------------------------------------------------------------------------------------*/
 bool Calibration::calibration(
         const std::vector<Vector3D>& points_3d, /// input: An array of 3D points.
         const std::vector<Vector2D>& points_2d, /// input: An array of 2D image points.
@@ -212,7 +220,9 @@ bool Calibration::calibration(
 
   
     /*
-    * TODO - 1: check if input is valid (e.g., number of correspondences >= 6, sizes of 2D/3D points must match).
+    * TODO - 1: 
+    * (1) check if input is valid (e.g., number of correspondences >= 6, sizes of 2D/3D points must match).
+    * (2) check if points are coplanar
     * ---------------------------------------------------------------------------------------------------------------*/
     if (points_2d.size() < 6) {
         std::cout << "insufficient number of 2d points, minimum required: 6" << '\n';
@@ -224,6 +234,12 @@ bool Calibration::calibration(
     }
     if (points_2d.size() != points_3d.size()) {
         std::cout << "sizes of 2D/3D points DONT match, please check the input files" << '\n';
+        return false;
+    }
+
+    // check whether points are coplanar
+    if (check_points_coplanar(points_3d)) {
+        std::cout << "input 3D points are ALL coplanar, please input not ALL coplanar 3D points " << '\n';
         return false;
     }
 
@@ -261,6 +277,50 @@ bool Calibration::calibration(
 
 
 
+// check if ALL points are coplanar
+bool check_points_coplanar(const std::vector<Vector3D>& points_3d) {
+    // condition check
+    if (points_3d.size() < 6) {
+        std::cout << "insufficient number of 3d points, minimum required: 6" << '\n';
+        return false;
+    }
+
+    // get the first 3 points to calculate the equation of the plane
+    const Vector3D& p1 = points_3d[0];
+    const Vector3D& p2 = points_3d[1];
+    const Vector3D& p3 = points_3d[2];
+
+    const auto& a1 = p2.x() - p1.x();
+    const auto& b1 = p2.y() - p1.y();
+    const auto& c1 = p2.z() - p1.z();
+
+    const auto& a2 = p3.x() - p1.x();
+    const auto& b2 = p3.y() - p1.y();
+    const auto& c2 = p3.z() - p1.z();
+
+    const auto& a = b1 * c2 - b2 * c1;
+    const auto& b = a2 * c1 - a1 * c2;
+    const auto& c = a1 * b2 - b1 * a2;
+    const auto& d = (-a * p1.x() - b * p1.y() - c * p1.z());
+
+    // now we have the equation of the plane:
+    // a* x + b * y + c * z + d == 0
+    std::size_t count_coplanar = 0;  // count the number of coplanar points
+    for (const auto& p : points_3d) {
+        const auto& x = p.x();
+        const auto& y = p.y();
+        const auto& z = p.z();
+        if (a * x + b * y + c * z + d == 0)++count_coplanar;
+    }
+
+    // check if ALL points are coplanar
+    if (count_coplanar == points_3d.size())return true;
+    
+    return false;
+}
+
+
+
 // construct the P matrix to use SVD to solve the m(so P * m = 0).
 bool construct_matrix_p(
     Matrix& P,
@@ -275,10 +335,10 @@ bool construct_matrix_p(
     int j = 0;  // index in points_2d
     for (int i = 0; i != P.rows(); ++i) {
         if (i & 1) {  // the position of a row is an odd number, e.g.: 1, 3, 5, 7, ...
-            const double x = points_3d[j].x();  // NB: points_3D, using INDEX j
-            const double y = points_3d[j].y();
-            const double z = points_3d[j].z();
-            const double v = points_2d[j].y();  // NB: poins_2D - y, using INDEX j
+            const auto& x = points_3d[j].x();  // NB: points_3D, using INDEX j
+            const auto& y = points_3d[j].y();
+            const auto& z = points_3d[j].z();
+            const auto& v = points_2d[j].y();  // NB: poins_2D - y, using INDEX j
             
 			P.set_row(i,
 			    {
@@ -289,10 +349,10 @@ bool construct_matrix_p(
             ++j;  // in the odd row, ++j, because two rows correspond to one point in points_2d
         }
         else {  // the position of a col is an even numbe, e.g.: 0, 2, 4, 6, ...
-            const double x = points_3d[j].x();  // NB: points_3D, using INDEX j
-            const double y = points_3d[j].y();
-            const double z = points_3d[j].z();
-            const double u = points_2d[j].x(); // NB: poins_2D - x, using INDEX j
+            const auto& x = points_3d[j].x();  // NB: points_3D, using INDEX j
+            const auto& y = points_3d[j].y();
+            const auto& z = points_3d[j].z();
+            const auto& u = points_2d[j].x(); // NB: poins_2D - x, using INDEX j
 
             P.set_row(i,
                 {
