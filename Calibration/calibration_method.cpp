@@ -30,7 +30,7 @@ using namespace easy3d;
 
 
 // to show the M matrix checking results or not
-#define CHECK_M
+// #define CHECK_M
 
 
 /*
@@ -61,6 +61,13 @@ double check_matrix(
 // extract intrinsic parameters from M
 void extract_intrinsic(
     const Matrix34& M,
+    double& fx, double& fy,
+    double& cx, double& cy,
+    double& skew);
+
+// extract extrinsic parameters from M
+void extract_extrinsic(
+    const Matrix34& M, Matrix33& R, Vector3D& t,  // extrinsic parameters
     double& fx, double& fy,
     double& cx, double& cy,
     double& skew);
@@ -330,12 +337,10 @@ bool Calibration::calibration(
     /*
     * TODO - 5: extract extrinsic parameters from M.
     * ---------------------------------------------------------------------------------------------------------------*/
+    extract_extrinsic(M, R, t, fx, fy, cx, cy, skew);
 
-
-    std::cout << "\n\tTODO: After you implement this function, please return 'true' - this will trigger the viewer to\n"
-                 "\t\tupdate the rendering using your recovered camera parameters. This can help you to visually check\n"
-                 "\t\tif your calibration is successful or not.\n\n" << std::flush;
-    return false;
+    std::cout << "calibration succeed! " << '\n';
+    return true;
 }
 
 
@@ -527,7 +532,7 @@ void extract_intrinsic(
     const Vector3D cross_a2_a3 = cross(a2, a3);
 
     /*
-    * @param: tho
+    * @param: rho
     * ------------------------------------------------------------------------------------ */
     if (abs(a3.length()) < epsilon) {  // check the length of a3
         std::cout << "the length of vector a3 is 0, can not calculate intrinsic parameters, please check " << '\n';
@@ -574,6 +579,74 @@ void extract_intrinsic(
     }
     const double cot_theta = cos_theta / sin_theta;
     skew = -fx * cot_theta;
+}
+
+
+// extract extrinsic parameters from M
+void extract_extrinsic(
+    const Matrix34& M, Matrix33& R, Vector3D& t,  // extrinsic parameters
+    double& fx, double& fy,
+    double& cx, double& cy,
+    double& skew)
+{
+    const double epsilon = 1e-8;  // tolerance
+
+    /*
+    * vectors for calculating parameters
+    * ------------------------------------------------------------------------------------ */
+    const Vector3D a1(M(0, 0), M(0, 1), M(0, 2));  // a1, a2, a3
+    const Vector3D a2(M(1, 0), M(1, 1), M(1, 2));
+    const Vector3D a3(M(2, 0), M(2, 1), M(2, 2));
+
+    const Vector3D cross_a1_a3 = cross(a1, a3);
+    const Vector3D cross_a2_a3 = cross(a2, a3);
+    const double len_a1_a3 = cross_a1_a3.length();
+    const double len_a2_a3 = cross_a2_a3.length();
+
+    /*
+    * @param: rho
+    * ------------------------------------------------------------------------------------ */
+    if (abs(a3.length()) < epsilon) {  // check the length of a3
+        std::cout << "the length of vector a3 is 0, can not calculate extrinsic parameters, please check " << '\n';
+        return;
+    }
+    const double rho = 1 / a3.length();  // how to decide the sign of rho?
+    const double rho_2 = rho * rho;  // pre-calculate the squared of rho, for direct use
+
+    /*
+    * Rotation matrix
+    * ------------------------------------------------------------------------------------ */
+    if (abs(len_a2_a3) < epsilon) {
+        std::cout << "length of cross_a2_a3 is equal to 0, can not calculate intrinsic parameters, please check " << '\n';
+        return;
+    }
+    const double scale_a2_a3 = 1 / len_a2_a3;
+    const Vector3D r1 = cross_a2_a3 * scale_a2_a3;
+    const Vector3D r3 = a3 * rho;
+    const Vector3D r2 = cross(r3, r1);
+    R.set_row(0, r1);
+    R.set_row(1, r2);
+    R.set_row(2, r3);
+
+    /*
+    * translation vector
+    * ------------------------------------------------------------------------------------ */
+    Matrix K(3, 3);
+    K(0, 0) = fx; K(0, 1) = skew;  K(0, 2) = cx;
+    K(1, 0) = 0;  K(1, 1) = rho_2 * len_a2_a3;  K(1, 2) = cy;
+    K(2, 0) = 0; K(2, 1) = 0;  K(2, 2) = 1;
+
+    Matrix invK(3, 3);
+    inverse(K, invK);
+    
+    const double b1 = M(0, 3);
+    const double b2 = M(1, 3);
+    const double b3 = M(2, 3);
+    const Vector3D b(b1, b2, b3);
+
+    Vector3D prev_t = invK * b;
+    t = prev_t * rho;
+
 }
 
 
