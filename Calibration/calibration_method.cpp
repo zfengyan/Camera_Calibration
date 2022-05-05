@@ -131,13 +131,13 @@ bool Calibration::calibration(
 //    std::cout << "M: \n" << A << std::endl;
 
     /// define a 3 by 4 matrix (and all elements initialized to 0.0)
-    Matrix M(3, 4, 0.0);
+    //Matrix M(3, 4, 0.0);
 
     /// set first row by a vector
-    M.set_row(0, Vector4D(1.1, 2.2, 3.3, 4.4));
+    //M.set_row(0, Vector4D(1.1, 2.2, 3.3, 4.4));
 
     /// set second column by a vector
-    M.set_column(1, Vector3D(5.5, 5.5, 5.5));
+    //M.set_column(1, Vector3D(5.5, 5.5, 5.5));
 
     /// define a 3 by 3 matrix (and all elements initialized to 0.0)
     Matrix33 B;
@@ -173,7 +173,7 @@ bool Calibration::calibration(
     Matrix33 I = Matrix::identity(3, 3, 1.0);
 
     /// matrix-vector product
-    Vector3D v = M * Vector4D(1, 2, 3, 4); // M is 3 by 4
+    // Vector3D v = M * Vector4D(1, 2, 3, 4); // M is 3 by 4
 
     //Matrix U(m, m, 0.0);   // initialized with 0s
     //Matrix S(m, n, 0.0);   // initialized with 0s
@@ -285,6 +285,17 @@ bool Calibration::calibration(
         return false;
     }
 
+    // reformat M matrix, use the last column of matrix V
+    const int v_cols = V.cols();
+    const int last_col = v_cols - 1;  // avoid V.cols() - 1
+    Matrix34 M
+    (
+        V(0, last_col), V(1, last_col), V(2, last_col), V(3, last_col),
+        V(4, last_col), V(5, last_col), V(6, last_col), V(7, last_col),
+        V(8, last_col), V(9, last_col), V(10,last_col), V(11, last_col)
+    );
+    std::cout << "M matrix" << '\n';
+    print_matrix(M);
 
     // TODO: extract intrinsic parameters from M.
 
@@ -341,7 +352,6 @@ bool check_points_coplanar(const std::vector<Vector3D>& points_3d) {
 }
 
 
-
 // construct the P matrix to use SVD to solve the m(so P * m = 0).
 bool construct_matrix_p(
     Matrix& P,
@@ -390,7 +400,6 @@ bool construct_matrix_p(
 }
 
 
-
 // if P matrix constructed, print P to check
 void print_matrix(const Matrix& P) {
     for (int i = 0; i != P.rows(); ++i) {
@@ -402,39 +411,40 @@ void print_matrix(const Matrix& P) {
 }
 
 
-
 // solve for M using SVD
 // the result V is NOT V^T(V.transpose()) in the eq. P = USV^T
 bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V) {
     svd_decompose(P, U, S, V);
 
-    // get the last row of matrix V (the last column of matrix VT)
-    const int v_nrows = V.rows();
-    auto print_last_row_of_v = [&](const Matrix& V) {
-        int i = v_nrows - 1;
-        for (int j = 0; j != V.cols(); ++j) {
+    // get the last column of matrix V (the last row of matrix VT)
+    const int v_cols = V.cols();
+    auto print_last_col_of_v = [&](const Matrix& V) {
+        int j = v_cols - 1;
+        for (int i = 0; i != V.rows(); ++i) {
             std::cout << V(i, j) << " ";
         }
         std::cout << '\n';
     };
-    std::cout << "the last row of matrix V is: " << '\n';
-    print_last_row_of_v(V);
+    std::cout << "the last column of matrix V is: " << '\n';
+    print_last_col_of_v(V);
 
-    // get the last column of matrix VT
+    // get the last row of matrix VT
     const Matrix& VT = V.transpose();
-    const int vt_ncols = VT.cols();
-    auto print_last_column_of_vt = [&](const Matrix& VT) {
-        int j = vt_ncols - 1;
-        for (int i = 0; i != VT.rows(); ++i) {
+    const int vt_nrows = VT.rows();
+    auto print_last_row_of_vt = [&](const Matrix& VT) {
+        int i = vt_nrows - 1;
+        for (int j = 0; j != VT.cols(); ++j) {
             std::cout << VT(i, j) << " ";
         }
         std::cout << '\n';
     };
-    std::cout << "the last column of matrix VT is: " << '\n';
-    print_last_column_of_vt(VT);
+    std::cout << "the last row of matrix VT is: " << '\n';
+    print_last_row_of_vt(VT);
 
     return true;
 }
+
+
 
 
 
