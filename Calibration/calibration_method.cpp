@@ -402,10 +402,10 @@ bool construct_matrix_p(
     int j = 0;  // index in points_2d
     for (int i = 0; i != P.rows(); ++i) {
         if (i & 1) {  // the position of a row is an odd number, e.g.: 1, 3, 5, 7, ...
-            const auto& x = points_3d[j].x();  // NB: points_3D, using INDEX j
-            const auto& y = points_3d[j].y();
-            const auto& z = points_3d[j].z();
-            const auto& v = points_2d[j].y();  // NB: poins_2D - y, using INDEX j
+            const auto x = points_3d[j].x();  // NB: points_3D, using INDEX j
+            const auto y = points_3d[j].y();
+            const auto z = points_3d[j].z();
+            const auto v = points_2d[j].y();  // NB: poins_2D - y, using INDEX j
             
 			P.set_row(i,
 			    {
@@ -416,10 +416,10 @@ bool construct_matrix_p(
             ++j;  // in the odd row, ++j, because two rows correspond to one point in points_2d
         }
         else {  // the position of a col is an even numbe, e.g.: 0, 2, 4, 6, ...
-            const auto& x = points_3d[j].x();  // NB: points_3D, using INDEX j
-            const auto& y = points_3d[j].y();
-            const auto& z = points_3d[j].z();
-            const auto& u = points_2d[j].x(); // NB: poins_2D - x, using INDEX j
+            const auto x = points_3d[j].x();  // NB: points_3D, using INDEX j
+            const auto y = points_3d[j].y();
+            const auto z = points_3d[j].z();
+            const auto u = points_2d[j].x(); // NB: poins_2D - x, using INDEX j
 
             P.set_row(i,
                 {
