@@ -294,8 +294,36 @@ bool Calibration::calibration(
         V(4, last_col), V(5, last_col), V(6, last_col), V(7, last_col),
         V(8, last_col), V(9, last_col), V(10,last_col), V(11, last_col)
     );
-    std::cout << "M matrix" << '\n';
+    std::cout << "M matrix: " << '\n';
     print_matrix(M);
+
+    // Intermediate option: check whether M matrix is correct -----------------------------
+    auto check_M = [&](
+        const Matrix34& M, 
+        const std::vector<Vector3D>& points_3d,
+        const std::vector<Vector2D>& points_2d)->void 
+    {
+        std::cout << "check M matrix: " << '\n';
+        for (int i = 0; i != points_3d.size(); ++i) {
+            const Vector4D& point = points_3d[i].homogeneous();
+            const Vector3D& res = M * point;  // M is 3 by 4, point is 4 by 1
+            const Vector2D& pixel = res.cartesian();
+
+            // calculate the difference
+            const Vector2D& image_pt = points_2d[i];  
+            double diff_u = pixel[0] - image_pt[0];  // x
+            double diff_v = pixel[1] - image_pt[1];  // y
+            
+            std::cout << "obtained pixel position: " << " " << pixel << '\n';
+            std::cout << "original pixel position: " << " " << image_pt << '\n';
+            std::cout << "difference: " << '\n';
+            std::cout << diff_u << "(u)" << " " << diff_v << "(v)" << '\n';
+            std::cout << '\n';
+        }
+    };
+    check_M(M, points_3d, points_2d);
+    // Intermediate option: check whether M matrix is correct -----------------------------
+
 
     // TODO: extract intrinsic parameters from M.
 
