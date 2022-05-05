@@ -52,6 +52,19 @@ void print_matrix(const Matrix& P);
 // solve for M using SVD
 bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V);
 
+// check M matrix
+double check_matrix(
+    const Matrix34& M,
+    const std::vector<Vector3D>& points_3d,
+    const std::vector<Vector2D>& points_2d);
+
+// extract intrinsic parameters from M
+void extract_intrinsic(
+    const Matrix34& M,
+    double& fx, double& fy,
+    double& cx, double& cy,
+    double& skew);
+
 
 /**
  * TODO: Finish this function for calibrating a camera from the corresponding 3D-2D point pairs.
@@ -123,7 +136,7 @@ bool Calibration::calibration(
     double dot_prod = dot(p, q);
 
     /// the cross product of two vectors
-    Vector cross_prod = cross(c, q);
+    Vector3D cross_prod = cross(c, q);
 
     /// normalize this vector
     cross_prod.normalize();
@@ -302,49 +315,20 @@ bool Calibration::calibration(
     print_matrix(M);
 
     // Intermediate option: check whether M matrix is correct -----------------------------
-    auto check_M = [&](
-        const Matrix34& M, 
-        const std::vector<Vector3D>& points_3d,
-        const std::vector<Vector2D>& points_2d)->double 
-    {
-        double diff{};
-        std::cout << "check M matrix: " << '\n';
-        for (int i = 0; i != points_3d.size(); ++i) {
-            const Vector4D& point = points_3d[i].homogeneous();
-            const Vector3D& res = M * point;  // M is 3 by 4, point is 4 by 1
-            const Vector2D& pixel = res.cartesian();
-
-            // calculate the difference
-            const Vector2D& image_pt = points_2d[i];  
-            double diff_u = pixel[0] - image_pt[0];  // x
-            double diff_v = pixel[1] - image_pt[1];  // y
-
-            // accumulate the squared difference
-            diff += diff_u * diff_u + diff_v * diff_v;
-            
-            std::cout << "obtained pixel position: " << " " << pixel << '\n';
-            std::cout << "original pixel position: " << " " << image_pt << '\n';
-            std::cout << "difference: " << '\n';
-            std::cout << diff_u << "(u)" << " " << diff_v << "(v)" << '\n';
-            std::cout << '\n';
-        }
-        return diff;
-    };
+#ifdef CHECK_M
+    auto diff = check_matrix(M, points_3d, points_2d);
+    std::cout << "total variance: " << diff << '\n';
+#endif
     // Intermediate option: check whether M matrix is correct -----------------------------
-
-    #ifdef CHECK_M
-        auto diff = check_M(M, points_3d, points_2d);
-        std::cout << "total variance: " << diff << '\n';
-    #endif
 
 
     /*
     * TODO - 4: extract intrinsic parameters from M.
     * ---------------------------------------------------------------------------------------------------------------*/
-    
-    
+    extract_intrinsic(M, fx, fy, cx, cy, skew);
+  
     /*
-    * TODO - 5: extract intrinsic parameters from M.
+    * TODO - 5: extract extrinsic parameters from M.
     * ---------------------------------------------------------------------------------------------------------------*/
 
 
@@ -473,7 +457,7 @@ bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V) {
         std::cout << '\n';
     };
     std::cout << "the last column of matrix V is: " << '\n';
-    print_last_col_of_v(V);
+    //print_last_col_of_v(V);
 
     // get the last row of matrix VT
     const Matrix& VT = V.transpose();
@@ -486,9 +470,110 @@ bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V) {
         std::cout << '\n';
     };
     std::cout << "the last row of matrix VT is: " << '\n';
-    print_last_row_of_vt(VT);
+    //print_last_row_of_vt(VT);
 
     return true;
+}
+
+
+// check M matrix
+// @return: variance
+double check_matrix(
+    const Matrix34& M, 
+    const std::vector<Vector3D>& points_3d, 
+    const std::vector<Vector2D>& points_2d)
+{
+    double diff{};
+    std::cout << "check M matrix: " << '\n';
+    for (int i = 0; i != points_3d.size(); ++i) {
+        const Vector4D& point = points_3d[i].homogeneous();
+        const Vector3D& res = M * point;  // M is 3 by 4, point is 4 by 1
+        const Vector2D& pixel = res.cartesian();
+
+        // calculate the difference
+        const Vector2D& image_pt = points_2d[i];
+        const double diff_u = pixel[0] - image_pt[0];  // x
+        const double diff_v = pixel[1] - image_pt[1];  // y
+
+        // accumulate the squared difference
+        diff += diff_u * diff_u + diff_v * diff_v;
+
+        std::cout << "obtained pixel position: " << " " << pixel << '\n';
+        std::cout << "original pixel position: " << " " << image_pt << '\n';
+        std::cout << "difference: " << '\n';
+        std::cout << diff_u << "(u)" << " " << diff_v << "(v)" << '\n';
+        std::cout << '\n';
+    }
+    return diff;
+}
+
+// extract intrinsic parameters from M
+void extract_intrinsic(
+    const Matrix34& M, 
+    double& fx, double& fy, 
+    double& cx, double& cy, 
+    double& skew)
+{
+    const double epsilon = 1e-8;  // tolerance
+    
+    /*
+    * vectors for calculating parameters
+    * ------------------------------------------------------------------------------------ */
+    const Vector3D a1(M(0, 0), M(0, 1), M(0, 2));  // a1, a2, a3
+    const Vector3D a2(M(1, 0), M(1, 1), M(1, 2));
+    const Vector3D a3(M(2, 0), M(2, 1), M(2, 2));
+
+    const Vector3D cross_a1_a3 = cross(a1, a3);
+    const Vector3D cross_a2_a3 = cross(a2, a3);
+
+    /*
+    * @param: tho
+    * ------------------------------------------------------------------------------------ */
+    if (abs(a3.length()) < epsilon) {  // check the length of a3
+        std::cout << "the length of vector a3 is 0, can not calculate intrinsic parameters, please check " << '\n';
+        return;
+    }
+    const double rho = 1 / a3.length();  // how to decide the sign of rho?
+    const double rho_2 = rho * rho;  // pre-calculate the squared of rho, for direct use
+
+    /*
+    * @param: cx, cy
+    * principle point, in slides, use 'u0' and 'v0'
+    * ------------------------------------------------------------------------------------ */
+    cx = rho_2 * dot(a1, a3);
+    cy = rho_2 * dot(a2, a3);
+
+    /*
+    * @param: sin_theta, cos_theta
+    * ------------------------------------------------------------------------------------ */
+    const double len_a1_a3 = cross_a1_a3.length();
+    const double len_a2_a3 = cross_a2_a3.length();
+    if (abs(len_a1_a3) < epsilon || abs(len_a2_a3) < epsilon) {
+        std::cout << "length of vector cross_a1_a3 is: " << len_a1_a3 << '\n';
+        std::cout << "length of vector cross_a2_a3 is: " << len_a2_a3 << '\n';
+        std::cout << "at least one of them is equal to 0, can not calculate intrinsic parameters, please check " << '\n';
+        return;
+    }
+    const double cos_theta = -dot(cross_a1_a3, cross_a2_a3) / (len_a1_a3 * len_a2_a3);
+    const double sin_theta = sqrt(1 - cos_theta * cos_theta);  // theta should <= 180 ?
+
+    /*
+    * @param: fx, fy
+    * the focal length (in our slides, we use 'alpha' and 'beta'),
+    * ------------------------------------------------------------------------------------ */
+    fx = rho_2 * len_a1_a3 * sin_theta;
+    fy = rho_2 * len_a2_a3 * sin_theta;
+
+    /*
+    * @param: skew
+    * the skew factor ('-alpha * cot_theta')
+    * ------------------------------------------------------------------------------------ */
+    if (abs(sin_theta) < epsilon) {
+        std::cout << "sin theta is 0, please check " << '\n';
+        return;
+    }
+    const double cot_theta = cos_theta / sin_theta;
+    skew = -fx * cot_theta;
 }
 
 
