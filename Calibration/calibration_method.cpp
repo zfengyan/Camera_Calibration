@@ -516,6 +516,7 @@ double check_matrix(
     return diff;
 }
 
+
 // extract intrinsic parameters from M
 void extract_intrinsic(
     const Matrix34& M, 
