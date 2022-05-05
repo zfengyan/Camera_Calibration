@@ -29,6 +29,10 @@
 using namespace easy3d;
 
 
+// to show the M matrix checking results or not
+#define CHECK_M
+
+
 /*
 * helpful functions for calibration
 * ---------------------------------------------------------------------------------------------------------------*/
@@ -321,9 +325,11 @@ bool Calibration::calibration(
             std::cout << '\n';
         }
     };
-    check_M(M, points_3d, points_2d);
     // Intermediate option: check whether M matrix is correct -----------------------------
 
+    #ifdef CHECK_M
+        check_M(M, points_3d, points_2d);
+    #endif
 
     // TODO: extract intrinsic parameters from M.
 
