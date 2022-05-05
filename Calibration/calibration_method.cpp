@@ -30,7 +30,7 @@ using namespace easy3d;
 
 
 // to show the M matrix checking results or not
-// #define CHECK_M
+//#define _MATRIX_CHECK_
 
 
 /*
@@ -279,13 +279,15 @@ bool Calibration::calibration(
     const int ncols = 12;  // number of cols is constant
     Matrix P(nrows, ncols);
     bool is_constructed = construct_matrix_p(P, points_3d, points_2d);
-    if (is_constructed) {
-        std::cout << "print P matrix: " << '\n';
-        print_matrix(P);
-    }
-    else {
+    if (!is_constructed) {
         std::cout << "construct P matrix failed, please check(maybe the subscript is out of bounds)" << '\n';
-    }
+        return false;
+    } 
+
+#ifdef _MATRIX_CHECK_
+    std::cout << "print P matrix: " << '\n';
+    print_matrix(P);
+#endif 
 
 
     /*
@@ -294,7 +296,6 @@ bool Calibration::calibration(
     * you can check if your M is correct by applying M on the 3D points. If correct, the projected point
     * should be very close to your input images points.
     * ---------------------------------------------------------------------------------------------------------------*/
-    std::cout << "test SVD" << '\n';
     const int& m = P.rows();
     const int& n = P.cols();
 
@@ -318,11 +319,11 @@ bool Calibration::calibration(
         V(4, last_col), V(5, last_col), V(6, last_col), V(7, last_col),
         V(8, last_col), V(9, last_col), V(10,last_col), V(11, last_col)
     );
-    std::cout << "M matrix: " << '\n';
-    print_matrix(M);
 
     // Intermediate option: check whether M matrix is correct -----------------------------
-#ifdef CHECK_M
+#ifdef _MATRIX_CHECK_
+    std::cout << "M matrix: " << '\n';
+    print_matrix(M);
     auto diff = check_matrix(M, points_3d, points_2d);
     std::cout << "total variance: " << diff << '\n';
 #endif
@@ -394,10 +395,11 @@ bool construct_matrix_p(
     const std::vector<Vector3D>& points_3d,
     const std::vector<Vector2D>& points_2d) 
 {
+#ifdef _MATRIX_CHECK_
     std::cout << "construct P matrix" << '\n';
     std::cout << "P matrix rows: " << P.rows() << '\n';
     std::cout << "P matrix cols: " << P.cols() << '\n';
-
+#endif
     // initialize the P matrix according to eq.(4) in notes: 02-camera_calibration.pdf
     int j = 0;  // index in points_2d
     for (int i = 0; i != P.rows(); ++i) {
@@ -431,7 +433,6 @@ bool construct_matrix_p(
 
     }
 
-    std::cout << "P matrix constructed! " << '\n';
     return true;  // if every step goes fine, return true
 }
 
@@ -452,7 +453,7 @@ void print_matrix(const Matrix& P) {
 bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V) {
     svd_decompose(P, U, S, V);
 
-    // get the last column of matrix V (the last row of matrix VT)
+    // get the last column of matrix V (the last row of matrix VT) - use lambda to access the code block
     const int v_cols = V.cols();
     auto print_last_col_of_v = [&](const Matrix& V) {
         int j = v_cols - 1;
@@ -461,10 +462,8 @@ bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V) {
         }
         std::cout << '\n';
     };
-    std::cout << "the last column of matrix V is: " << '\n';
-    //print_last_col_of_v(V);
-
-    // get the last row of matrix VT
+    
+    // get the last row of matrix VT - use lambda to access the code block
     const Matrix& VT = V.transpose();
     const int vt_nrows = VT.rows();
     auto print_last_row_of_vt = [&](const Matrix& VT) {
@@ -474,8 +473,13 @@ bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V) {
         }
         std::cout << '\n';
     };
+
+#ifdef _MATRIX_CHECK_
+    std::cout << "the last column of matrix V is: " << '\n';
+    print_last_col_of_v(V);
     std::cout << "the last row of matrix VT is: " << '\n';
-    //print_last_row_of_vt(VT);
+    print_last_row_of_vt(VT);
+#endif
 
     return true;
 }
