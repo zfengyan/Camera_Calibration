@@ -305,8 +305,9 @@ bool Calibration::calibration(
     auto check_M = [&](
         const Matrix34& M, 
         const std::vector<Vector3D>& points_3d,
-        const std::vector<Vector2D>& points_2d)->void 
+        const std::vector<Vector2D>& points_2d)->double 
     {
+        double diff{};
         std::cout << "check M matrix: " << '\n';
         for (int i = 0; i != points_3d.size(); ++i) {
             const Vector4D& point = points_3d[i].homogeneous();
@@ -317,6 +318,9 @@ bool Calibration::calibration(
             const Vector2D& image_pt = points_2d[i];  
             double diff_u = pixel[0] - image_pt[0];  // x
             double diff_v = pixel[1] - image_pt[1];  // y
+
+            // accumulate the squared difference
+            diff += diff_u * diff_u + diff_v * diff_v;
             
             std::cout << "obtained pixel position: " << " " << pixel << '\n';
             std::cout << "original pixel position: " << " " << image_pt << '\n';
@@ -324,16 +328,25 @@ bool Calibration::calibration(
             std::cout << diff_u << "(u)" << " " << diff_v << "(v)" << '\n';
             std::cout << '\n';
         }
+        return diff;
     };
     // Intermediate option: check whether M matrix is correct -----------------------------
 
     #ifdef CHECK_M
-        check_M(M, points_3d, points_2d);
+        auto diff = check_M(M, points_3d, points_2d);
+        std::cout << "total variance: " << diff << '\n';
     #endif
 
-    // TODO: extract intrinsic parameters from M.
 
-    // TODO: extract extrinsic parameters from M.
+    /*
+    * TODO - 4: extract intrinsic parameters from M.
+    * ---------------------------------------------------------------------------------------------------------------*/
+    
+    
+    /*
+    * TODO - 5: extract intrinsic parameters from M.
+    * ---------------------------------------------------------------------------------------------------------------*/
+
 
     std::cout << "\n\tTODO: After you implement this function, please return 'true' - this will trigger the viewer to\n"
                  "\t\tupdate the rendering using your recovered camera parameters. This can help you to visually check\n"
