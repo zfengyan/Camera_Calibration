@@ -199,8 +199,8 @@ bool Calibration::calibration(
     * you can check if your M is correct by applying M on the 3D points. If correct, the projected point
     * should be very close to your input images points.
     * ---------------------------------------------------------------------------------------------------------------*/
-    const int& m = P.rows();
-    const int& n = P.cols();
+    const auto& m = P.rows();
+    const auto& n = P.cols();
 
 	Matrix U(m, m);  
 	Matrix S(m, n);  
@@ -214,8 +214,8 @@ bool Calibration::calibration(
     }
 
     // reformat M matrix, use the last column of matrix V
-    const int v_cols = V.cols();
-    const int last_col = v_cols - 1;  // avoid V.cols() - 1
+    const auto& v_cols = V.cols();
+    const auto& last_col = v_cols - 1;  // avoid V.cols() - 1
     Matrix34 M
     (
         V(0, last_col), V(1, last_col), V(2, last_col), V(3, last_col),
