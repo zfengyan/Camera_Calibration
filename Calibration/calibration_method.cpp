@@ -98,7 +98,7 @@ namespace GEO1016_A1 {
             end = std::chrono::high_resolution_clock::now();
             duration = end - start;
 
-            std::cout << "Execution Time: " << duration.count() << "s\n";
+            std::cout << "Execution Time: " << duration.count()*1000.0 << "ms\n";
         }
     };
 
