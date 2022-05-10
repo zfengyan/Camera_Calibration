@@ -403,7 +403,7 @@ namespace GEO1016_A1 {
 
 
     // check M matrix
-    // @return: variance
+    // @return: total variance
     double check_matrix(
         const Matrix34& M,
         const std::vector<Vector3D>& points_3d,
