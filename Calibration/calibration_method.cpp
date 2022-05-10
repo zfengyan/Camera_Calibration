@@ -322,36 +322,32 @@ namespace GEO1016_A1 {
         std::cout << "P matrix cols: " << P.cols() << '\n';
 #endif
         // initialize the P matrix according to eq.(4) in notes: 02-camera_calibration.pdf
-        int j = 0;  // index in points_2d
-        for (int i = 0; i != P.rows(); ++i) {
-            if (i & 1) {  // the position of a row is an odd number, e.g.: 1, 3, 5, 7, ...
-                const auto x = points_3d[j].x();  // NB: points_3D, using INDEX j
-                const auto y = points_3d[j].y();
-                const auto z = points_3d[j].z();
-                const auto v = points_2d[j].y();  // NB: poins_2D - y, using INDEX j
+        // avoid branching inside for loop body whenever possible
+        int k = 0;  // index in points_2d
 
-                P.set_row(i,
-                    {
-                        0, 0, 0, 0,
-                        x, y, z, 1.0,
-                        -v * x, -v * y, -v * z, -v
-                    });
-                ++j;  // in the odd row, ++j, because two rows correspond to one point in points_2d
-            }
-            else {  // the position of a col is an even numbe, e.g.: 0, 2, 4, 6, ...
-                const auto x = points_3d[j].x();  // NB: points_3D, using INDEX j
-                const auto y = points_3d[j].y();
-                const auto z = points_3d[j].z();
-                const auto u = points_2d[j].x(); // NB: poins_2D - x, using INDEX j
+        for (int odd = 1, even = 0; odd != P.rows() && even != P.rows(); odd += 2, even += 2) {
+            const auto& x = points_3d[k].x();  // points_3D, using INDEX k
+            const auto& y = points_3d[k].y();
+            const auto& z = points_3d[k].z();
 
-                P.set_row(i,
-                    {
-                        x, y, z, 1.0,
-                        0, 0, 0, 0,
-                        -u * x, -u * y, -u * z, -u
-                    });
-            }
+            const auto& u = points_2d[k].x(); // poins_2D - x, using INDEX k
+            const auto& v = points_2d[k].y();  // poins_2D - y, using INDEX k
 
+            P.set_row(odd,  // set the odd row
+                {
+                    0, 0, 0, 0,
+                    x, y, z, 1.0,
+                    -v * x, -v * y, -v * z, -v
+                });
+
+            P.set_row(even,  // set the even row
+                {
+                    x, y, z, 1.0,
+                    0, 0, 0, 0,
+                    -u * x, -u * y, -u * z, -u
+                });
+            
+            ++k;
         }
 
         return true;  // if every step goes fine, return true
