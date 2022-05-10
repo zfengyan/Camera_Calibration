@@ -37,7 +37,7 @@ using namespace easy3d;
 
 /*
 * helpful functions for calibration
-* use namespace to avoid confusion
+* use namespace to avoid (possible)confusion
 * ---------------------------------------------------------------------------------------------------------------*/
 namespace GEO1016_A1 {
 
