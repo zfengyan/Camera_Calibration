@@ -168,7 +168,7 @@ bool Calibration::calibration(
     * TODO - 2: construct the P matrix to use SVD to solve the m(so P * m = 0).
     * P is a 2n * 12 matrix(2n >= 12)
     * ---------------------------------------------------------------------------------------------------------------*/
-    int nrows = (int)(2 * points_3d.size());
+    const int nrows = (int)(2 * points_3d.size());
     const int ncols = 12;  // number of cols is constant
     Matrix P(nrows, ncols);
     bool is_constructed = GEO1016_A1::construct_matrix_p(P, points_3d, points_2d);
@@ -219,6 +219,8 @@ bool Calibration::calibration(
     std::cout << "M matrix: " << '\n';
     GEO1016_A1::print_matrix(M);
 #endif
+    std::cout << '\n';
+    std::cout << "result check: " << '\n';
     auto diff = GEO1016_A1::check_matrix(M, points_3d, points_2d);
     std::cout << "variance: " << (diff/points_3d.size()) << '\n';
     // Intermediate option: check whether M matrix is correct -----------------------------
@@ -389,7 +391,7 @@ namespace GEO1016_A1 {
         svd_decompose(P, U, S, V);
 
         // get the last column of matrix V (the last row of matrix VT) - use lambda to access the code block
-        const int v_cols = V.cols();
+        const auto& v_cols = V.cols();
         auto print_last_col_of_v = [&](const Matrix& V) {
             int j = v_cols - 1;
             for (int i = 0; i != V.rows(); ++i) {
@@ -400,7 +402,7 @@ namespace GEO1016_A1 {
 
         // get the last row of matrix VT - use lambda to access the code block
         const Matrix& VT = V.transpose();
-        const int vt_nrows = VT.rows();
+        const auto& vt_nrows = VT.rows();
         auto print_last_row_of_vt = [&](const Matrix& VT) {
             int i = vt_nrows - 1;
             for (int j = 0; j != VT.cols(); ++j) {
@@ -428,7 +430,6 @@ namespace GEO1016_A1 {
         const std::vector<Vector2D>& points_2d)
     {
         double diff{};
-        std::cout << "check M matrix: " << '\n';
         for (int i = 0; i != points_3d.size(); ++i) {
             const Vector4D& point = points_3d[i].homogeneous();
             const Vector3D& res = M * point;  // M is 3 by 4, point is 4 by 1
@@ -436,16 +437,16 @@ namespace GEO1016_A1 {
 
             // calculate the difference
             const Vector2D& image_pt = points_2d[i];
-            const double diff_u = pixel[0] - image_pt[0];  // x
-            const double diff_v = pixel[1] - image_pt[1];  // y
+            const auto& diff_u = pixel[0] - image_pt[0];  // x
+            const auto& diff_v = pixel[1] - image_pt[1];  // y
 
             // accumulate the squared difference
             diff += diff_u * diff_u + diff_v * diff_v;
 
-            std::cout << "obtained pixel position: " << " " << pixel << '\n';
-            std::cout << "original pixel position: " << " " << image_pt << '\n';
+            std::cout << "obtained pixel: " << " " << pixel << '\n';
+            std::cout << "original pixel: " << " " << image_pt << '\n';
             std::cout << "difference: " << '\n';
-            std::cout << diff_u << "(u)" << " " << diff_v << "(v)" << '\n';
+            std::cout << "u: " << diff_u << " " << "v: " << diff_v << '\n';
             std::cout << '\n';
         }
         return diff;
@@ -464,10 +465,10 @@ namespace GEO1016_A1 {
         const Vector3D a2(M(1, 0), M(1, 1), M(1, 2));
         const Vector3D a3(M(2, 0), M(2, 1), M(2, 2));
 
-        const Vector3D cross_a1_a3 = cross(a1, a3);
-        const Vector3D cross_a2_a3 = cross(a2, a3);
-        const double len_a1_a3 = cross_a1_a3.length();
-        const double len_a2_a3 = cross_a2_a3.length();
+        const Vector3D& cross_a1_a3 = cross(a1, a3);
+        const Vector3D& cross_a2_a3 = cross(a2, a3);
+        const auto& len_a1_a3 = cross_a1_a3.length();
+        const auto& len_a2_a3 = cross_a2_a3.length();
 
         /*
         * @param: rho
@@ -476,8 +477,8 @@ namespace GEO1016_A1 {
             std::cout << "the length of vector a3 is 0, can not calculate intrinsic parameters, please check " << '\n';
             return;
         }
-        const double rho = 1 / a3.length();  // how to decide the sign of rho?
-        const double rho_2 = rho * rho;  // pre-calculate the squared of rho, for direct use
+        const auto& rho = 1 / a3.length();  // how to decide the sign of rho?
+        const auto& rho_2 = rho * rho;  // pre-calculate the squared of rho, for direct use
 
         /*
         * @param: sin_theta, cos_theta
@@ -488,8 +489,8 @@ namespace GEO1016_A1 {
             std::cout << "at least one of them is equal to 0, can not calculate intrinsic parameters, please check " << '\n';
             return;
         }
-        const double cos_theta = -dot(cross_a1_a3, cross_a2_a3) / (len_a1_a3 * len_a2_a3);
-        const double sin_theta = sqrt(1 - cos_theta * cos_theta);  // theta should <= 180 ?
+        const auto& cos_theta = -dot(cross_a1_a3, cross_a2_a3) / (len_a1_a3 * len_a2_a3);
+        const auto& sin_theta = sqrt(1 - cos_theta * cos_theta);  // theta should <= 180 ?
 
 
         /*
@@ -519,7 +520,7 @@ namespace GEO1016_A1 {
             std::cout << "sin theta is 0, please check " << '\n';
             return;
         }
-        const double cot_theta = cos_theta / sin_theta;
+        const auto& cot_theta = cos_theta / sin_theta;
         skew = -fx * cot_theta;
 
 
@@ -535,10 +536,10 @@ namespace GEO1016_A1 {
             std::cout << "length of cross_a2_a3 is equal to 0, can not calculate intrinsic parameters, please check " << '\n';
             return;
         }
-        const double scale_a2_a3 = 1 / len_a2_a3;
-        const Vector3D r1 = cross_a2_a3 * scale_a2_a3;
-        const Vector3D r3 = a3 * rho;
-        const Vector3D r2 = cross(r3, r1);
+        const auto& scale_a2_a3 = 1 / len_a2_a3;
+        const Vector3D& r1 = cross_a2_a3 * scale_a2_a3;
+        const Vector3D& r3 = a3 * rho;
+        const Vector3D& r2 = cross(r3, r1);
         R.set_row(0, r1);
         R.set_row(1, r2);
         R.set_row(2, r3);
@@ -554,12 +555,12 @@ namespace GEO1016_A1 {
         Matrix invK(3, 3);
         inverse(K, invK);
 
-        const double b1 = M(0, 3);
-        const double b2 = M(1, 3);
-        const double b3 = M(2, 3);
+        const auto& b1 = M(0, 3);
+        const auto& b2 = M(1, 3);
+        const auto& b3 = M(2, 3);
         const Vector3D b(b1, b2, b3);
 
-        Vector3D prev_t = invK * b;
+        const Vector3D& prev_t = invK * b;
         t = prev_t * rho;
 
     }
