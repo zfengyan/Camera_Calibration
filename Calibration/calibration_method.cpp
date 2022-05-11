@@ -229,7 +229,7 @@ bool Calibration::calibration(
     GEO1016_A1::print_matrix(M);
 #endif
     auto diff = GEO1016_A1::check_matrix(M, points_3d, points_2d);
-    std::cout << "total variance: " << (diff/points_3d.size()) << '\n';
+    std::cout << "variance: " << (diff/points_3d.size()) << '\n';
     // Intermediate option: check whether M matrix is correct -----------------------------
 
 
