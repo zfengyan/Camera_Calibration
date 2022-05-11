@@ -300,6 +300,7 @@ namespace GEO1016_A1 {
         return false;
     }
 
+
     // check if inputs are valid
     bool if_input_valid(
         const std::vector<Vector3D>& points_3d,
@@ -325,6 +326,7 @@ namespace GEO1016_A1 {
         }
         return true;
     }
+
 
     // construct the P matrix to use SVD to solve the m(so P * m = 0).
     bool construct_matrix_p(
