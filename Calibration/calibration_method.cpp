@@ -44,6 +44,11 @@ namespace GEO1016_A1 {
     // check whether ALL points are coplanar
     bool check_points_coplanar(const std::vector<Vector3D>& points_3d);
 
+    // check if inputs are valid
+    bool if_input_valid(
+        const std::vector<Vector3D>& points_3d,
+        const std::vector<Vector2D>& points_2d);
+
     // construct P matrix
     bool construct_matrix_p(
         Matrix& P,
@@ -151,27 +156,12 @@ bool Calibration::calibration(
 
     /*
     * TODO - 1: 
-    * (1) check if input is valid (e.g., number of correspondences >= 6, sizes of 2D/3D points must match).
+    * check if input is valid
+    * (1) check (e.g., number of correspondences >= 6, sizes of 2D/3D points must match).
     * (2) check if points are coplanar
     * ---------------------------------------------------------------------------------------------------------------*/
-    if (points_2d.size() < 6) {
-        std::cout << "insufficient number of 2d points, minimum required: 6" << '\n';
-        return false;
-    }
-    if (points_3d.size() < 6) {
-        std::cout << "insufficient number of 3d points, minimum required: 6" << '\n';
-        return false;
-    }
-    if (points_2d.size() != points_3d.size()) {
-        std::cout << "sizes of 2D/3D points DONT match, please check the input files" << '\n';
-        return false;
-    }
-
-    // check whether points are coplanar
-    if (GEO1016_A1::check_points_coplanar(points_3d)) {
-        std::cout << "input 3D points are ALL coplanar, please input not ALL coplanar 3D points " << '\n';
-        return false;
-    }
+    bool if_valid = GEO1016_A1::if_input_valid(points_3d, points_2d);
+    if (!if_valid)return false;
 
 
     /*
@@ -215,13 +205,14 @@ bool Calibration::calibration(
 
     // reformat M matrix, use the last column of matrix V
     const auto& v_cols = V.cols();
-    const auto& last_col = v_cols - 1;  // avoid V.cols() - 1
+    const auto& last_col = v_cols - 1; 
     Matrix34 M
     (
         V(0, last_col), V(1, last_col), V(2, last_col), V(3, last_col),
         V(4, last_col), V(5, last_col), V(6, last_col), V(7, last_col),
         V(8, last_col), V(9, last_col), V(10,last_col), V(11, last_col)
     );
+
 
     // Intermediate option: check whether M matrix is correct -----------------------------
 #ifdef _MATRIX_CHECK_
@@ -309,6 +300,31 @@ namespace GEO1016_A1 {
         return false;
     }
 
+    // check if inputs are valid
+    bool if_input_valid(
+        const std::vector<Vector3D>& points_3d,
+        const std::vector<Vector2D>& points_2d)
+    {
+        if (points_2d.size() < 6) {
+            std::cout << "insufficient number of 2d points, minimum required: 6" << '\n';
+            return false;
+        }
+        if (points_3d.size() < 6) {
+            std::cout << "insufficient number of 3d points, minimum required: 6" << '\n';
+            return false;
+        }
+        if (points_2d.size() != points_3d.size()) {
+            std::cout << "sizes of 2D/3D points DONT match, please check the input files" << '\n';
+            return false;
+        }
+
+        // check whether points are coplanar
+        if (check_points_coplanar(points_3d)) {
+            std::cout << "input 3D points are ALL coplanar, please input not ALL coplanar 3D points " << '\n';
+            return false;
+        }
+        return true;
+    }
 
     // construct the P matrix to use SVD to solve the m(so P * m = 0).
     bool construct_matrix_p(
