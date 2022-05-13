@@ -36,6 +36,8 @@ https://3d.bk.tudelft.nl/liangliang/
 
 The calibration method is [here](https://github.com/SEUZFY/Camera_Calibration/blob/master/Calibration/calibration_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
 
+The report is written in `LaTeX` and the source is available [here](https://github.com/SEUZFY/Camera_Calibration/tree/master/report/source). Feel free to use it if it helps you.
+
 # COLLABORATORS
 
 **Yitong**:
