@@ -32,6 +32,16 @@ https://3d.bk.tudelft.nl/liangliang/
 
 * Or download the code and open the [CMakeLists.txt](https://github.com/SEUZFY/Camera_Calibration/blob/master/CMakeLists.txt) file in an IDE.
 
+Build and run this project, a viewer as shown above should pop up automatically, press `space` and select one of the `.txt` files to calibrate.
+
+**Note**: `.txt` files are available in the [data](https://github.com/SEUZFY/Camera_Calibration/tree/master/resources/data) folder.
+
+After calibration, press `t` to show the calibrated virtual camera (in blue frame), as shown below:
+
+<img width="479" alt="images2" src="https://user-images.githubusercontent.com/72781910/168394397-b1c35e49-b508-46a3-b2fc-3f6a0450ee41.PNG">
+
+Meanwhile some helpful information should be printed to the console.
+
 # GOOD TO KNOW
 
 The calibration method is [here](https://github.com/SEUZFY/Camera_Calibration/blob/master/Calibration/calibration_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
