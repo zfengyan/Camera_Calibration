@@ -27,7 +27,6 @@
 
 #include <chrono>  // for Timer
 
-
 using namespace easy3d;
 
 
@@ -58,8 +57,11 @@ namespace GEO1016_A1 {
     // print out a matrix
     void print_matrix(const Matrix& P);
 
-    // solve for M using SVD
+    // solve P for M using SVD
     bool solve_svd(const Matrix& P, Matrix& U, Matrix& S, Matrix& V);
+
+    // verify if P * m = 0, m is the last column of V, default tolerance: 0.01(based on tests)
+    bool verify_p_m(const Matrix& P, const Matrix& V, double tolerance = 0.01);
 
     // check M matrix
     double check_matrix(
@@ -203,9 +205,20 @@ bool Calibration::calibration(
         return false;
     }
 
+#ifdef _MATRIX_CHECK_
+    // verify if P * m = 0
+    std::cout << "verify if P * m = 0" << '\n';
+    auto p_m = GEO1016_A1::verify_p_m(P, V, 1e-8);  // default tolerance is 0.01
+    if (p_m)std::cout << "check: P * m = 0" << '\n';
+    else {
+        std::cout << "check: P * m != 0\n";
+        std::cout << "please check P or the result of SVD, or you may want to select a bigger tolerance\n";
+    }
+#endif      
+
     // reformat M matrix, use the last column of matrix V
-    const auto& v_cols = V.cols();
-    const auto& last_col = v_cols - 1; 
+    const int& v_cols = V.cols();
+    const int& last_col = v_cols - 1;  // avoid std::size_t - 1 directly
     Matrix34 M
     (
         V(0, last_col), V(1, last_col), V(2, last_col), V(3, last_col),
@@ -419,6 +432,25 @@ namespace GEO1016_A1 {
 #endif
 
         return true;
+    }
+
+
+    // verify if P * m = 0, m is the last column of V
+    bool verify_p_m(const Matrix& P, const Matrix& V, double tolerance) {
+        bool res_flag(true);
+        const int& v_cols = V.cols();
+        const int& last_col = v_cols - 1;  // avoid std::size_t - 1 directly
+
+        // loop through each row of P, calculate the product of vector m(12 elements)
+        for (int i = 0; i != P.rows(); ++i) {
+            double res{};
+            for (int j = 0; j != 12; ++j) {  // loop through each column(12 in total)
+                res += P(i, j) * V(j, last_col);
+            }
+            std::cout << "P * m - row "<<i + 1<<" : " << res << '\n';
+            if (abs(res) > tolerance)res_flag = false;
+        }
+        return res_flag;
     }
 
 
