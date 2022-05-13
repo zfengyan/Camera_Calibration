@@ -121,7 +121,7 @@ namespace GEO1016_A1 {
 bool Calibration::calibration(
         const std::vector<Vector3D>& points_3d, /// input: An array of 3D points.
         const std::vector<Vector2D>& points_2d, /// input: An array of 2D image points.
-        double& fx, double& fy,    /// output: the focal length (in our slides, we use 'alpha' and 'beta'),
+        double& fx, double& fy,    /// output: the focal length (in our slides, we use 'alpha' and 'beta/sin_theta'),
         double& cx, double& cy,    /// output: the principal point (in our slides, we use 'u0' and 'v0'),
         double& skew,              /// output: the skew factor ('-alpha * cot_theta')
         Matrix33& R,               /// output: the 3x3 rotation matrix encoding camera orientation.
