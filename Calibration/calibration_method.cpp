@@ -542,7 +542,7 @@ namespace GEO1016_A1 {
         * the focal length (in our slides, we use 'alpha' and 'beta'),
         * ------------------------------------------------------------------------------------ */
         fx = rho_2 * len_a1_a3 * sin_theta;
-        fy = rho_2 * len_a2_a3 * sin_theta;  // fy - with or without sin_theta?
+        fy = rho_2 * len_a2_a3;  // beta(in the notes) = rho_2 * len_a2_a3 * sin_theta, fy = beta / sin_theta
 
         /*
         * @param: skew
