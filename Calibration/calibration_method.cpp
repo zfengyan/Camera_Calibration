@@ -82,7 +82,7 @@ namespace GEO1016_A1 {
     * to evaluate the execution time
     * e.g.
     * \code
-    *   {   
+    *   {
     *       Timer time;
     *       //execution process
     *       //...
@@ -105,7 +105,7 @@ namespace GEO1016_A1 {
             end = std::chrono::high_resolution_clock::now();
             duration = end - start;
 
-            std::cout << "Execution Time: " << duration.count()*1000.0 << "ms\n";
+            std::cout << "Execution Time: " << duration.count() * 1000.0 << "ms\n";
         }
     };
 
@@ -119,15 +119,15 @@ namespace GEO1016_A1 {
  * @return True on success, otherwise false. On success, the camera parameters are returned by
  * ---------------------------------------------------------------------------------------------------------------*/
 bool Calibration::calibration(
-        const std::vector<Vector3D>& points_3d, /// input: An array of 3D points.
-        const std::vector<Vector2D>& points_2d, /// input: An array of 2D image points.
-        double& fx, double& fy,    /// output: the focal length (in our slides, we use 'alpha' and 'beta/sin_theta'),
-        double& cx, double& cy,    /// output: the principal point (in our slides, we use 'u0' and 'v0'),
-        double& skew,              /// output: the skew factor ('-alpha * cot_theta')
-        Matrix33& R,               /// output: the 3x3 rotation matrix encoding camera orientation.
-        Vector3D& t)               /// output：a 3D vector encoding camera translation.
+    const std::vector<Vector3D>& points_3d, /// input: An array of 3D points.
+    const std::vector<Vector2D>& points_2d, /// input: An array of 2D image points.
+    double& fx, double& fy,    /// output: the focal length (in our slides, we use 'alpha' and 'beta/sin_theta'),
+    double& cx, double& cy,    /// output: the principal point (in our slides, we use 'u0' and 'v0'),
+    double& skew,              /// output: the skew factor ('-alpha * cot_theta')
+    Matrix33& R,               /// output: the 3x3 rotation matrix encoding camera orientation.
+    Vector3D& t)               /// output：a 3D vector encoding camera translation.
 {
-    
+
     // TODO: the above code just demonstrates some useful data structures and APIs. Please remove all above code in your
     //       final submission.
 
@@ -135,17 +135,17 @@ bool Calibration::calibration(
     // implementation starts ...
 
     std::cout << "\n[Liangliang]:\n"
-                 "\tThe input parameters of this function are:\n"
-                 "\t\t- points_3d: An array of 3D points (input to this function)\n"
-                 "\t\t- points_2d: An array of 2D image points (input to this function)\n"
-                 "\tThis function must return either 'true' on success or 'false' otherwise. On success, the camera\n"
-                 "\tparameters are returned by the following variables:\n"
-                 "\t\t- fx and fy: the focal lengths (in our slides, we use 'alpha' and 'beta')\n"
-                 "\t\t- cx and cy: the principal point (in our slides, we use 'u0' and 'v0')\n"
-                 "\t\t- skew:      the skew factor ('-alpha * cot_theta')\n"
-                 "\t\t- R:         the 3x3 rotation matrix encoding camera orientation\n"
-                 "\t\t- t:         a 3D vector encoding camera location.\n"
-                 "\tIMPORTANT: don't forget to write your recovered parameters to the above variables." << std::endl;
+        "\tThe input parameters of this function are:\n"
+        "\t\t- points_3d: An array of 3D points (input to this function)\n"
+        "\t\t- points_2d: An array of 2D image points (input to this function)\n"
+        "\tThis function must return either 'true' on success or 'false' otherwise. On success, the camera\n"
+        "\tparameters are returned by the following variables:\n"
+        "\t\t- fx and fy: the focal lengths (in our slides, we use 'alpha' and 'beta')\n"
+        "\t\t- cx and cy: the principal point (in our slides, we use 'u0' and 'v0')\n"
+        "\t\t- skew:      the skew factor ('-alpha * cot_theta')\n"
+        "\t\t- R:         the 3x3 rotation matrix encoding camera orientation\n"
+        "\t\t- t:         a 3D vector encoding camera location.\n"
+        "\tIMPORTANT: don't forget to write your recovered parameters to the above variables." << std::endl;
 
 
 
@@ -157,7 +157,7 @@ bool Calibration::calibration(
     GEO1016_A1::Timer time;
 
     /*
-    * TODO - 1: 
+    * TODO - 1:
     * check if input is valid
     * (1) check (e.g., number of correspondences >= 6, sizes of 2D/3D points must match).
     * (2) check if points are coplanar
@@ -177,7 +177,7 @@ bool Calibration::calibration(
     if (!is_constructed) {
         std::cout << "construct P matrix failed, please check(maybe the subscript is out of bounds)" << '\n';
         return false;
-    } 
+    }
 
 #ifdef _MATRIX_CHECK_
     std::cout << "print P matrix: " << '\n';
@@ -187,18 +187,18 @@ bool Calibration::calibration(
 
     /*
     * TODO - 3: solve for M (3 * 4 matrix, the whole projection matrix, i.e., M = K * [R, t]) using SVD decomposition.
-    * Optional: 
+    * Optional:
     * you can check if your M is correct by applying M on the 3D points. If correct, the projected point
     * should be very close to your input images points.
     * ---------------------------------------------------------------------------------------------------------------*/
     const auto& m = P.rows();
     const auto& n = P.cols();
 
-	Matrix U(m, m);  
-	Matrix S(m, n);  
-	Matrix V(n, n); 
+    Matrix U(m, m);
+    Matrix S(m, n);
+    Matrix V(n, n);
 
-	// Compute the SVD decomposition of P
+    // Compute the SVD decomposition of P
     bool is_svd_solved = GEO1016_A1::solve_svd(P, U, S, V);
     if (!is_svd_solved) {
         std::cout << "SVD failed, please check " << '\n';
@@ -223,7 +223,7 @@ bool Calibration::calibration(
     (
         V(0, last_col), V(1, last_col), V(2, last_col), V(3, last_col),
         V(4, last_col), V(5, last_col), V(6, last_col), V(7, last_col),
-        V(8, last_col), V(9, last_col), V(10,last_col), V(11, last_col)
+        V(8, last_col), V(9, last_col), V(10, last_col), V(11, last_col)
     );
 
 
@@ -235,7 +235,7 @@ bool Calibration::calibration(
     std::cout << '\n';
     std::cout << "result check: " << '\n';
     auto diff = GEO1016_A1::check_matrix(M, points_3d, points_2d);
-    std::cout << "variance: " << (diff/points_3d.size()) << '\n';
+    std::cout << "variance: " << (diff / points_3d.size()) << '\n';
     // Intermediate option: check whether M matrix is correct -----------------------------
 
 
@@ -245,10 +245,10 @@ bool Calibration::calibration(
     *       if the origin of the world coordinate system is in front of the camera
     *       then the positive sign(+) should be chosen, otherwise the negative sign(-)
     *       should be chosen(in a general case).
-    * 
+    *
     *       In this assignment, the origin of the world coordinate system(the corner of the chessboard)
     *       is in FRONT of the camera, therefore the positive sign(+) is used.
-    *       
+    *
     * ---------------------------------------------------------------------------------------------------------------*/
     // see the function: extract_params(M, R, t, fx, fy, cx, cy, skew);
 
@@ -259,7 +259,7 @@ bool Calibration::calibration(
 
     /*
     * extract parameters for TODO - 4 and TODO - 5
-    * ---------------------------------------------------------------------------------------------------------------*/    
+    * ---------------------------------------------------------------------------------------------------------------*/
     GEO1016_A1::extract_params(M, R, t, fx, fy, cx, cy, skew);
 
     std::cout << "calibration succeed! " << '\n';
@@ -269,7 +269,7 @@ bool Calibration::calibration(
 
 /* --------------------------------------------------------------------------------------------------------------
 * ------------------------------------------- IMPLEMENTATION ----------------------------------------------------
-* ---------------------------------------------------------------------------------------------------------------*/    
+* ---------------------------------------------------------------------------------------------------------------*/
 
 
 namespace GEO1016_A1 {
@@ -379,7 +379,7 @@ namespace GEO1016_A1 {
                     0, 0, 0, 0,
                     -u * x, -u * y, -u * z, -u
                 });
-            
+
             ++k;
         }
 
@@ -447,7 +447,7 @@ namespace GEO1016_A1 {
             for (int j = 0; j != 12; ++j) {  // loop through each column(12 in total)
                 res += P(i, j) * V(j, last_col);
             }
-            std::cout << "P * m - row "<<i + 1<<" : " << res << '\n';
+            std::cout << "P * m - row " << i + 1 << " : " << res << '\n';
             if (abs(res) > tolerance)res_flag = false;
         }
         return res_flag;
@@ -598,25 +598,3 @@ namespace GEO1016_A1 {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
