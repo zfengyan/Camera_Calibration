@@ -41,16 +41,12 @@ The report is written in `LaTeX` and the source is available [here](https://gith
 # COLLABORATORS
 
 **Yitong**:
-
 xiayitong0630@gmail.com
-
-Her [GitHub](https://github.com/YitongXia/camera-calibration)
+-> Her [GitHub](https://github.com/YitongXia/camera-calibration)
 
 **Leo Kan**:
-
 leo.kan01@gmail.com
-
-His [GitHub](https://github.com/leowhk/A1_calibration).
+-> His [GitHub](https://github.com/leowhk/A1_calibration).
  
  
 
