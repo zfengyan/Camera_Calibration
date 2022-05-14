@@ -1,10 +1,13 @@
 # Camera_Calibration
 
-This is for camera calibration based on this open-source project:
-
-https://github.com/LiangliangNan/Easy3D
+Project for performing camera calibration based on the open-source project - [easy3D](
+https://github.com/LiangliangNan/Easy3D).
 
 <img width="478" alt="images" src="https://user-images.githubusercontent.com/72781910/168390581-25a1adce-4b04-4589-b655-a73455d3e2d6.PNG">
+
+**Easy3D** is a lightweight, easy-to-use, and efficient open-source C++ library for processing and rendering 3D data. **IF YOU WANT TO USE IT** please be aware of the following information:
+
+**COPYRIGHT**:
 
 Copyright (C) 2015 Liangliang Nan <liangliang.nan@gmail.com>
 
@@ -25,6 +28,7 @@ https://3d.bk.tudelft.nl/liangliang/
   url = {https://doi.org/10.21105/joss.03255}
 }
 ```
+More info about easy3D please refer to: https://github.com/LiangliangNan/Easy3D.
 
 # HOW TO USE
 
