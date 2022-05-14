@@ -11,7 +11,7 @@ Copyright (C) 2015 Liangliang Nan <liangliang.nan@gmail.com>
 https://3d.bk.tudelft.nl/liangliang/
 
 
-## CITATION INFO:
+**CITATION INFO**:
 ```
 @article{easy3d2021,
   title = {Easy3{D}: a lightweight, easy-to-use, and efficient {C}++ library for processing and rendering 3{D} data},
