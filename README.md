@@ -44,9 +44,15 @@ Meanwhile some helpful information should be printed to the console.
 
 # GOOD TO KNOW
 
-The calibration method is [here](https://github.com/SEUZFY/Camera_Calibration/blob/master/Calibration/calibration_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
+* The calibration method is described in **details** [here](https://github.com/SEUZFY/Camera_Calibration/blob/master/Calibration_method_explanation/camera_calibration.pdf). **IT SHOULD BE NOTED** that this explanation comes from the course notes, if you want to use it in a scientific work, you are kindly asked to mention the **ORIGINAL** author: 
+  
+  < Liangliang Nan <liangliang.nan@gmail.com> >
+  
+  < https://3d.bk.tudelft.nl/liangliang/ > 
 
-The report is written in `LaTeX` and the source is available [here](https://github.com/SEUZFY/Camera_Calibration/tree/master/report/source). Feel free to use it if it helps you.
+* The calibration implementation is [here](https://github.com/SEUZFY/Camera_Calibration/blob/master/Calibration/calibration_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
+
+* The report is written in `LaTeX` and the source is available [here](https://github.com/SEUZFY/Camera_Calibration/tree/master/report/source). Feel free to use it if it helps you.
 
 # COLLABORATORS
 
