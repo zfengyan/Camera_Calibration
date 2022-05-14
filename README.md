@@ -1,6 +1,6 @@
 # Camera_Calibration
 
-Project for performing camera calibration based on the open-source project - [easy3D](
+Project for performing camera calibration based on the open-source project - [Easy3D](
 https://github.com/LiangliangNan/Easy3D).
 
 <img width="478" alt="images" src="https://user-images.githubusercontent.com/72781910/168390581-25a1adce-4b04-4589-b655-a73455d3e2d6.PNG">
@@ -28,7 +28,7 @@ https://3d.bk.tudelft.nl/liangliang/
   url = {https://doi.org/10.21105/joss.03255}
 }
 ```
-More info about easy3D please refer to: https://github.com/LiangliangNan/Easy3D.
+More info about **Easy3D** please refer to: https://github.com/LiangliangNan/Easy3D.
 
 # HOW TO USE
 
