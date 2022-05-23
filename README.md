@@ -3,7 +3,7 @@
 Project for performing camera calibration based on the open-source project - [Easy3D](
 https://github.com/LiangliangNan/Easy3D).
 
-<img width="478" alt="images" src="https://user-images.githubusercontent.com/72781910/168390581-25a1adce-4b04-4589-b655-a73455d3e2d6.PNG">
+![giphy](https://user-images.githubusercontent.com/72781910/169722278-6daeef24-6213-4f9a-a1f7-60ee6c0d786f.gif)
 
 **Easy3D** is a lightweight, easy-to-use, and efficient open-source C++ library for processing and rendering 3D data. **IF YOU WANT TO USE IT** please be aware of the following information:
 
