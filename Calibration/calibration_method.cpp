@@ -306,7 +306,7 @@ namespace GEO1016_A1 {
             const auto& x = p.x();
             const auto& y = p.y();
             const auto& z = p.z();
-            if (a * x + b * y + c * z + d == 0)++count_coplanar;
+            if (abs(a * x + b * y + c * z + d)<1e-8)++count_coplanar;
         }
 
         // check if ALL points are coplanar
